@@ -1,24 +1,27 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Examples:
-#
-#   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
-#   Character.create(name: "Luke", movie: movies.first)
-
-# db/seeds.rb
-
 require 'faker'
 
 # Supprime tous les articles existants
 Article.delete_all
 
-# Création de 30 articles avec Faker
+# Seed for creating 30 articles
 30.times do
+  user = User.all.sample
   Article.create(
     title: Faker::Lorem.sentence,
-    content: Faker::Lorem.paragraphs.join("\n\n")
+    content: Faker::Lorem.paragraphs.join("\n\n"), # Ajout de la virgule ici
+    user: user
   )
 end
 
-puts "Seed finished"
+puts "Articles seeded successfully"
+
+# Assigning the first three articles to the first three users
+first_three_users = User.limit(3) # Correction ici, User.limit(3) au lieu de User.limit(2)
+
+Article.all.each_with_index do |article, index|
+  article.user = first_three_users[index]
+  article.save
+end
+
+puts "Users assigned to articles successfully"
+

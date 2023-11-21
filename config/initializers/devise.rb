@@ -1,5 +1,9 @@
 
 Devise.setup do |config|
+
+  config.jwt do |jwt|
+		jwt.secret = Rails.application.credentials.devise[:jwt_secret_key]
+	end
  
   config.mailer_sender = 'please-change-me-at-config-initializers-devise@example.com'
 

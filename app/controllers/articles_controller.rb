@@ -1,5 +1,6 @@
 class ArticlesController < ApplicationController
-  before_action :set_article, only: %i[ show update destroy ]
+  before_action :authenticate_user!, only: %i[create update destroy]
+  before_action :set_article, only: %i[show update destroy]
 
   # GET /articles
   def index
@@ -16,6 +17,7 @@ class ArticlesController < ApplicationController
   # POST /articles
   def create
     @article = Article.new(article_params)
+    @article.user = current_user  # Associer l'article à l'utilisateur actuel
 
     if @article.save
       render json: @article, status: :created, location: @article
@@ -26,16 +28,24 @@ class ArticlesController < ApplicationController
 
   # PATCH/PUT /articles/1
   def update
-    if @article.update(article_params)
-      render json: @article
+    if @article.user == current_user  # Vérifier si l'utilisateur actuel est le propriétaire de l'article
+      if @article.update(article_params)
+        render json: @article
+      else
+        render json: @article.errors, status: :unprocessable_entity
+      end
     else
-      render json: @article.errors, status: :unprocessable_entity
+      render json: { error: 'Unauthorized' }, status: :unauthorized
     end
   end
 
   # DELETE /articles/1
   def destroy
-    @article.destroy
+    if @article.user == current_user  # Vérifier si l'utilisateur actuel est le propriétaire de l'article
+      @article.destroy
+    else
+      render json: { error: 'Unauthorized' }, status: :unauthorized
+    end
   end
 
   private
